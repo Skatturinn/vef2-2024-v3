@@ -1,10 +1,26 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { catchErrors } from './lib/catch-errors.js';
-import { bye, hello, router } from './routes/api.js';
+import { router } from './routes/api.js';
 
 const app = express();
-
-app.get('/', catchErrors(hello), catchErrors(bye));
+export async function index(req: Request, res: Response) {
+	res.json([
+		{
+			href: '/teams',
+			methods: ['GET', 'POST'],
+		}, {
+			href: '/teams/:slug',
+			methods: ['GET', 'PATCH', 'DELETE'],
+		}, {
+			href: '/games',
+			methods: ['GET', 'POST'],
+		}, {
+			href: '/games/:id',
+			methods: ['GET', 'PATCH', 'DELETE	'],
+		}
+	])
+}
+app.get('/', catchErrors(index));
 app.use(router);
 
 const port = process.env.PORT || 3000;

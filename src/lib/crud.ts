@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { conditionalUpdate, getTeamBySlug, insertTeam } from './db.js';
+import { conditionalUpdate, getGame, getTeamBySlug, insertGame, insertTeam, listTeams } from './db.js';
 import { mappedTeam, sluggy } from './util.js';
 
 
@@ -55,4 +55,17 @@ export async function updateTeam(
 	const responseTeam = mappedTeam(Team)
 
 	return res.status(200).json(responseTeam)
+}
+
+export async function createGame(req: Request, res: Response, next: NextFunction) {
+	const { home, away, date } = req.body;
+	const teams = await listTeams();
+	const heimalid = teams?.find(stak => stak.name == home.name)
+	const utilid = teams?.find(stak => stak.name == away.name)
+	const newGame = heimalid && utilid && await insertGame(date || new Date(), heimalid?.id, Number(home.score), utilid?.id, Number(away.score));
+	if (!newGame) {
+		return next(new Error('Failed to create team'));
+	}
+	const game = await getGame(newGame.rows[0].game_id)
+	return res.status(201).json(game);
 }

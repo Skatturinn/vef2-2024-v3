@@ -20,3 +20,9 @@ export function mappedTeam(team: { name: string, id: number, slug: string, descr
 		href: `/teams/${team.slug}`
 	}
 }
+
+export function currentdate() {
+	return String(
+		(new Date().toISOString()).slice(0, 10).split('-').reverse()
+	)
+}

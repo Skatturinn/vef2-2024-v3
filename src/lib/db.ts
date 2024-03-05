@@ -134,14 +134,26 @@ export async function getGame(id: number) {
 	}
 	const result = await query(q, [id]) as pg.QueryResult<pggame> | null
 	if (result && result.rows) {
-		return result.rows[0];
+		const row = result.rows[0]
+		return {
+			id: row.game_id,
+			date: row.date,
+			home: {
+				name: row.home_name,
+				score: row.home_score,
+			},
+			away: {
+				name: row.away_name,
+				score: row.away_score,
+			}
+		};
 	}
 	return null
 }
 
 export async function insertGame(gamedate: Date, homename: number, homescore: number, awayname: number, awayscore: number) {
 	const q =
-		'insert into games (date, home, home_score, away, away_score) values ($1, $2, $3, $4, $5);';
+		'insert into games (date, home, home_score, away, away_score) values ($1, $2, $3, $4, $5) returning *;';
 
 	const result = await query(q, [gamedate, homename, homescore, awayname, awayscore]);
 	return result;

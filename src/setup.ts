@@ -1,14 +1,11 @@
 import dotenv from 'dotenv';
-import { createSchema, dropSchema, insertGame, insertTeam, listTeams } from './lib/db.js';
+import { createSchema, dropSchema, insertTeam, listTeams } from './lib/db.js';
 import { readFile, readFilesFromDir } from './setup/file.js';
-import { nameScoreValidation } from './setup/validation.js';
+import { insertData } from './setup/parse.js';
 
-// import { nameScoreValidation } from './setup/validation.js';
 dotenv.config();
 
 export async function create() {
-	console.log('test')
-	// TODO setja upp gagnagrun + gögn
 	const drop = await dropSchema();
 	if (drop) {
 		console.info('schema dropped');
@@ -25,60 +22,32 @@ export async function create() {
 	const teamsjson = await readFile('./data/teams.json');
 	let teamsarray;
 	if (typeof teamsjson === 'string') {
-		teamsarray = JSON.parse(teamsjson);
+		teamsarray = JSON.parse(teamsjson) as Array<string>;
 		for await (const stak of teamsarray) {
 			await insertTeam(stak)
-			// console.log(teamsObject)
 		}
+	}
+	if (!teamsarray) {
+		throw new Error('Mistök i að lesa teams.json skrá')
 	}
 	const teamsObject = await listTeams()
 	if (!teamsObject) {
-		return false
+		throw new Error('villa í að sækja lið')
 	}
 	const data = (await readFilesFromDir('./data'))
-	for (const string of data) {
-		const fileString = await readFile(string)
-		if (typeof fileString !== 'string') {
-			continue
-		}
-		const fileContents = JSON.parse(fileString)
-		// as { date: Date, games: Array<{ home: TeamScore, away: TeamScore }> }
-		// console.log(fileContents)
-		if (string.includes('gameday') && fileContents && fileContents?.date && fileContents?.games) {
-			for (const game of fileContents.games) {
-				// console.log(game)
-				const heima = nameScoreValidation(game.home, teamsarray);
-				// console.log(heima)
-				const uti = nameScoreValidation(game.away, teamsarray);
-				const heimanr = !heima || teamsObject.find(
-					(stak) => stak.name === heima.name);
-				const utinr = !uti || teamsObject.find(
-					stak => stak.name === uti.name);
-				if (heima && uti && typeof heimanr !== 'boolean' && heimanr && typeof utinr !== 'boolean' && utinr) {
-					await insertGame(
-						fileContents.date,
-						heimanr.id, heima.score,
-						utinr.id, uti.score
-					)
-				}
-			}
-
-		}
+	if (!data) {
+		throw new Error('villa í að lesa skrár')
+	} else {
+		console.info('inserting data')
 	}
-
-	// if (data) {
-	// 	insert2 = await query(data.toString())
-	// }
-	// if (insert2) {
-	// 	console.info('user inserted');
-	// } else {
-	// 	console.info('user not inserted');
-	// }
-	// await end()
+	const insert = await insertData(data, teamsarray, teamsObject)
+	if (!insert) {
+		throw new Error('ekki tókst að setja inn g0gn')
+	} else {
+		console.info('Data inserted')
+	}
 }
 
 create().catch((err) => {
 	console.error('Error creating running setup', err);
 });
-
-// main().catch((e) => console.error(e));

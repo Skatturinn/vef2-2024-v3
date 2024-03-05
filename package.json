@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "nodemon",
-		"setup": "node --loader ts-node/esm ./src/setup.ts tsc ./src/.*ts",
+		"setup": "node --loader ts-node/esm ./src/setup.ts",
 		"start": "node --loader ts-node/esm ./src/app.ts",
 		"lint": "eslint . --ext .ts",
 		"dev2": "nodemon node --env-file=.env --watch-path=./src ./src/app.js"

@@ -3,7 +3,6 @@ import express, { NextFunction, Request, Response } from 'express';
 import { catchErrors } from '../lib/catch-errors.js';
 import { getGame, getGames, getTeamBySlug, listTeams } from '../lib/db.js';
 import { sayHello } from '../lib/hello.js';
-import { create } from '../setup.js';
 
 dotenv.config();
 
@@ -37,13 +36,7 @@ export async function resTeams(req: Request, res: Response, next: NextFunction) 
 	}
 }
 
-export async function resetDB(req: Request, res: Response, next: NextFunction) {
-	await create()
-	// await insertData()
-	res.status(200).json({ reset: 'reset' })
-}
 // Lið:
-// router.get('/reset', catchErrors(resetDB))
 // - `GET /teams` skilar lista af liðum:
 //   - `200 OK` skilað með gögnum á JSON formi.
 router.get('/teams', catchErrors(resTeams), catchErrors(bye))

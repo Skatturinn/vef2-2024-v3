@@ -7,7 +7,7 @@ import { nameScoreValidation } from './validation.js';
 export async function insertData(
 	data: Array<string>,
 	teamsarray: Array<string>,
-	teamsObject: Array<{ name: string, id: number, slug: string, descripiton: string | null }>
+	teamsObject: Array<{ name: string, id: number, slug: string, description: string | null }>
 ): Promise<boolean> {
 	for await (const string of data) {
 		const fileString = await readFile(string)

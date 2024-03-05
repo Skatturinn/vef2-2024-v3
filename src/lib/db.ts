@@ -226,6 +226,25 @@ export async function getTeamBySlug(slug: string) {
 	return null;
 }
 
+export async function getGameById(id: number) {
+	const q = `
+	SELECT
+	  *
+	FROM
+	  games
+	  WHERE 
+	  game_id = $1
+  `;
+
+	const result = await query(q, [id]) as pg.QueryResult<{ id: number, date: Date, home: { name: string, score: number }, away: { name: string, score: number } }>;
+
+	if (result) {
+		return result.rows;
+	}
+
+	return null;
+}
+
 export async function conditionalUpdate(
 	table: string,
 	id: number,
@@ -266,6 +285,16 @@ export async function conditionalUpdate(
 
 export async function deleteTeamBySlug(slug: string): Promise<boolean> {
 	const result = await query('DELETE FROM teams WHERE slug = $1', [slug]);
+
+	if (!result) {
+		return false;
+	}
+
+	return result.rowCount === 1;
+}
+
+export async function deleteGameById(id: number): Promise<boolean> {
+	const result = await query('DELETE FROM games WHERE game_id = $1', [id]);
 
 	if (!result) {
 		return false;

@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import { body } from 'express-validator';
 import { catchErrors } from '../lib/catch-errors.js';
-import { createGame, createTeam, updateTeam } from '../lib/crud.js';
-import { deleteTeamBySlug, getGame, getGames, getTeamBySlug, listTeams } from '../lib/db.js';
+import { createGame, createTeam, updateGame, updateTeam } from '../lib/crud.js';
+import { deleteGameById, deleteTeamBySlug, getGame, getGameById, getGames, getTeamBySlug, listTeams } from '../lib/db.js';
 import { sayHello } from '../lib/hello.js';
 import { atLeastOneBodyValueValidator, genericSanitizer, stringValidator, teamMustBeUnique, validationCheck, xssSanitizer } from '../lib/validation.js';
 
@@ -178,5 +178,67 @@ const postGame = [
 ]
 
 router.post('/games', postGame) // - Búa til leiki.
+
+const patchGame = [
+	stringValidator({ field: 'home.name', minLength: 3, maxLength: 128, optional: true }), // min 3 max 128
+	stringValidator({ field: 'away.name', minLength: 3, maxLength: 128, optional: true }), // min 3 max 128
+	atLeastOneBodyValueValidator(['home', 'away', 'date']),
+	body('date')
+		.trim()
+		.custom((value) => {
+			const date = new Date(value);
+			return !Number.isNaN(date.getTime());
+		})
+		.withMessage('Dagsetning verður að vera gild')
+		.optional(),
+	body('home').custom(async (value, { req }) => {
+		if (value.name && value.name === req.body.away.name) {
+			throw new Error('Heimalið og útilið verða að vera mismunandi');
+		}
+		return true;
+	}).optional(),
+	body('home.score')
+		.trim()
+		.isInt({ min: 0, max: 100 })
+		.withMessage('home.score þarf að vera á bilinu 0 til 100').optional(),
+	body('away.score')
+		.isInt({ min: 0, max: 100 })
+		.withMessage('away.score þarf að vera á bilinu 0 til 100').optional(),
+	xssSanitizer('home.name'),
+	xssSanitizer('away.name'),
+	xssSanitizer('home.score'),
+	xssSanitizer('away.score'),
+	validationCheck, //   - `400 Bad Request` skilað ef gögn sem send inn eru ekki rétt (vantar gögn, gögn á röngu formi eða innihald þeirra ólöglegt).
+	genericSanitizer('home.name'),
+	genericSanitizer('away.name'),
+	genericSanitizer('home.score'),
+	genericSanitizer('away.score'),
+	updateGame //   - `200 OK` skilað ásamt upplýsingum um lið.
+]
+
+router.patch('/games/:id', patchGame) // - breyta leiki.
+
+export async function deleteGame(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	const { id } = req.params;
+	const team = await getGameById(Number(id))
+	if (!team) {
+		return res.status(404) //   - `404 Not Found` skilað ef lið er ekki til.
+	}
+
+	const result = await deleteGameById(Number(id))
+
+	if (!result) {
+		return next(new Error('unable to delete')) //   - `500 Internal Error` skilað ef villa kom upp.
+	}
+
+	return res.status(204).json({})
+}
+
+router.delete('/games/:id', deleteGame) // - `DELETE /teams/:slug` eyðir liði:
+
 // - Breyta leik.
 // - Uppfæra leik.

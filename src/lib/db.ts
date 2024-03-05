@@ -1,8 +1,8 @@
 import { readFile } from 'fs/promises';
 import pg from 'pg';
-import slugify from 'slugify';
 import environment1 from './environment.js';
 import { logger } from './logger.js';
+import { sluggy } from './util.js';
 
 const SCHEMA_FILE = './src/sql/schema.sql';
 const DROP_SCHEMA_FILE = './src/sql/drop.sql';
@@ -160,18 +160,11 @@ export async function insertGame(gamedate: Date, homename: number, homescore: nu
 }
 
 export async function insertTeam(teamname: string, description = '') {
-	const teamslug = slugify(teamname, {
-		replacement: '-',  // replace spaces with replacement character, defaults to `-`
-		remove: undefined, // remove characters that match regex, defaults to `undefined`
-		lower: true,      // convert to lower case, defaults to `false`
-		strict: false,     // strip special characters except replacement, defaults to `false`
-		locale: 'vi',      // language code of the locale to use
-		trim: true         // trim leading and trailing replacement chars, defaults to `true`
-	})
+	const teamslug = sluggy(teamname)
 	const q =
 		'insert into teams (name, slug, description) values ($1, $2, $3) returning *;';
 
-	const result = await query(q, [teamname, teamslug, description]) as pg.QueryResult<{ name: string, id: number, slug: string, description: string | null }>;;
+	const result = await query(q, [teamname, teamslug, description]) as pg.QueryResult<{ name: string, id: number, slug: string, description: string | null }>;
 	return result
 }
 
@@ -250,6 +243,7 @@ export async function conditionalUpdate(
 	id: number,
 	fields: Array<string | null>,
 	values: Array<string | number | null>,
+	idtag: number | string | object | null | undefined = ''
 ) {
 	const filteredFields = fields.filter((i) => typeof i === 'string');
 	const filteredValues = values.filter(
@@ -271,7 +265,7 @@ export async function conditionalUpdate(
 	  UPDATE ${table}
 		SET ${updates.join(', ')}
 	  WHERE
-		id = $1
+		${idtag}id = $1
 	  RETURNING *
 	  `;
 

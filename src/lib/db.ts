@@ -107,17 +107,6 @@ export async function getGames() {
 }
 
 export async function getGame(id: number) {
-	type game = {
-		date: Date,
-		home: {
-			name: string,
-			score: number
-		},
-		away: {
-			name: string,
-			score: number
-		}
-	};
 	const q = `
     SELECT
 		game_id,
@@ -158,7 +147,7 @@ export async function insertGame(gamedate: Date, homename: number, homescore: nu
 	return result;
 }
 
-export async function insertTeam(teamname: string) {
+export async function insertTeam(teamname: string, description = '') {
 	const teamslug = slugify(teamname, {
 		replacement: '-',  // replace spaces with replacement character, defaults to `-`
 		remove: undefined, // remove characters that match regex, defaults to `undefined`
@@ -168,9 +157,9 @@ export async function insertTeam(teamname: string) {
 		trim: true         // trim leading and trailing replacement chars, defaults to `true`
 	})
 	const q =
-		'insert into teams (name, slug) values ($1, $2);';
+		'insert into teams (name, slug, description) values ($1, $2, $3) returning *;';
 
-	const result = await query(q, [teamname, teamslug]);
+	const result = await query(q, [teamname, teamslug, description]) as pg.QueryResult<{ name: string, id: number, slug: string, description: string | null }>;;
 	return result
 }
 
@@ -197,7 +186,7 @@ export async function listTeams() {
 		teams
 	`;
 
-	const result = await query(q) as pg.QueryResult<{ name: string, id: number, slug: string, descripiton: string | null }>; // Ef ég breyti type def þá hrynur allt?
+	const result = await query(q) as pg.QueryResult<{ name: string, id: number, slug: string, description: string | null }>; // Ef ég breyti type def þá hrynur allt?
 
 	if (result && result.rows) {
 		return result.rows;
@@ -216,11 +205,59 @@ export async function getTeamBySlug(slug: string) {
 		slug = $1
 	`;
 
-	const result = await query(q, [slug]);
+	const result = await query(q, [slug]) as pg.QueryResult<{ name: string, id: number, slug: string, description: string | null }>;
 
 	if (result) {
 		return result.rows;
 	}
 
 	return null;
+}
+
+export async function conditionalUpdate(
+	table: string,
+	id: number,
+	fields: Array<string | null>,
+	values: Array<string | number | null>,
+) {
+	const filteredFields = fields.filter((i) => typeof i === 'string');
+	const filteredValues = values.filter(
+		(i): i is string | number => typeof i === 'string' || typeof i === 'number',
+	);
+
+	if (filteredFields.length === 0) {
+		return false;
+	}
+
+	if (filteredFields.length !== filteredValues.length) {
+		throw new Error('fields and values must be of equal length');
+	}
+
+	// id is field = 1
+	const updates = filteredFields.map((field, i) => `${field} = $${i + 2}`);
+
+	const q = `
+	  UPDATE ${table}
+		SET ${updates.join(', ')}
+	  WHERE
+		id = $1
+	  RETURNING *
+	  `;
+
+	const queryValues: Array<string | number> = (
+		[id] as Array<string | number>
+	).concat(filteredValues);
+	const result = await query(q, queryValues);
+
+	return result;
+}
+
+export async function deleteTeamBySlug(slug: string): Promise<boolean> {
+	const result = await query('DELETE FROM teams WHERE slug = $1', [slug]);
+
+	if (!result) {
+		return false;
+	}
+
+	return result.rowCount === 1;
 }

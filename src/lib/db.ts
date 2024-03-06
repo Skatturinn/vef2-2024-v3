@@ -239,7 +239,7 @@ export async function getGameById(id: number) {
 }
 
 export async function conditionalUpdate(
-	table: string,
+	table: 'games' | 'teams',
 	id: number,
 	fields: Array<string | null>,
 	values: Array<string | number | null>,

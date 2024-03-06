@@ -106,9 +106,9 @@ Setja skal upp vefinn á Render, Railway eða Heroku (ath að uppsetning á Hero
 
 ## Mat
 
-- 40% Vefþjónustur útfærðar.
-- 20% Gagnagrunnur og gögn.
-- 20% TypeScript notað.
+- 40% Vefþjónustur útfærðar. #
+- 20% Gagnagrunnur og gögn. #
+- 20% TypeScript notað. #
 - 20% Tæki, tól og test, verkefni sett upp í hýsingu.
 
 ## Sett fyrir

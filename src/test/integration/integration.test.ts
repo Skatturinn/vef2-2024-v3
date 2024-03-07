@@ -6,8 +6,6 @@ import { app } from '../../app';
 
 describe('integration', () => {
 	describe('/teams & /games', () => {
-		// --- léleg lausn frá GPT, næ ekki að loka requestum greinilega?
-		// --- chatgpt endar
 
 		test('Get /teams returns 200', async () => {
 			const response = await request(app).get('/teams');

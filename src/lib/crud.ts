@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { body } from 'express-validator';
+import { token } from './auth.js';
 import { conditionalUpdate, deleteGameById, deleteTeamBySlug, getGame, getGameById, getGames, getTeamBySlug, insertGame, insertTeam, listTeams } from './db.js';
 import { mappedTeam, sluggy } from './util.js';
 import { atLeastOneBodyValueValidator, genericSanitizer, stringValidator, teamMustBeUnique, validationCheck, xssSanitizer } from './validation.js';
@@ -79,7 +80,13 @@ export async function updateTeam(
 	return res.status(200).json(responseTeam)
 }
 
+// export async function checkHeader(req: Request, res: Response,) {
+// 	console.log(req.headers)
+// 	return res.json(req.headers)
+// }
+
 export const postTeam = [
+	token,
 	stringValidator({ field: 'name', minLength: 3, maxLength: 128, optional: false }), // min 3 max 128
 	stringValidator({ field: 'description', minLength: undefined, maxLength: 1024, optional: true }),
 	teamMustBeUnique,
@@ -92,6 +99,7 @@ export const postTeam = [
 ]
 
 export const patchTeam = [
+	token,
 	stringValidator({ field: 'name', minLength: 3, maxLength: 128, optional: true }), // min 3 max 128
 	stringValidator({ field: 'description', minLength: undefined, maxLength: 1024, optional: true }),
 	atLeastOneBodyValueValidator(['name', 'description']),
@@ -180,6 +188,7 @@ export async function createGame(req: Request, res: Response, next: NextFunction
 }
 
 export const postGame = [
+	token,
 	stringValidator({ field: 'home.name', minLength: 3, maxLength: 128, optional: false }), // min 3 max 128
 	stringValidator({ field: 'away.name', minLength: 3, maxLength: 128, optional: false }), // min 3 max 128
 	body('date')
@@ -271,6 +280,7 @@ export async function updateGame(
 }
 
 export const patchGame = [
+	token,
 	stringValidator({ field: 'home.name', minLength: 3, maxLength: 128, optional: true }).optional(true), // min 3 max 128
 	stringValidator({ field: 'away.name', minLength: 3, maxLength: 128, optional: true }).optional(true), // min 3 max 128
 	atLeastOneBodyValueValidator(['home', 'away', 'date']),

@@ -1,3 +1,9 @@
+# I Headers þarf að vera
+
+## authorization: yes
+
+Annars er ekki hægt að framkvæma neinar gjörðir
+
 # skipanir fyrir test
 
 - npm run setup

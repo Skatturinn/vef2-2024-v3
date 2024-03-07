@@ -38,5 +38,18 @@ describe('integration', () => {
 			const response = await request(app).delete('/teams/whatda');
 			expect(response.statusCode).toBe(204);
 		});
+		let gameid = '';
+		test('Post /games returns 201', async () => {
+			const response = await request(app).post('/games').send({ date: new Date(), home: { name: 'Boltaliðið', score: 2 }, away: { name: 'Dripplararnir', score: 1 } });
+			gameid = response.body.id
+			expect(response.statusCode).toBe(201);
+		});
+		if (!Number.isNaN(gameid)) {
+			test('Delete /teams/whatda returns 204', async () => {
+				const response = await request(app).delete(`/games/${gameid}`);
+				expect(response.statusCode).toBe(204);
+			});
+		}
+
 	})
 })

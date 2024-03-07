@@ -10,12 +10,7 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "sourceMap": true,
-    "baseUrl": "./",
-    "paths": {
-      "@lib/*": ["src/lib/*.js"],
-      "@routes/*": ["src/routes/*.js"],
-      "@setup/*": ["src/routes/*.js"]
-    }
+    "baseUrl": "./"
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]

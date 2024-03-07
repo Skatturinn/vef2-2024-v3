@@ -1,3 +1,8 @@
+# skipanir fyrir test
+
+- npm run setup
+- npm run test
+
 # Vefforritun 2, 2024, verkefni 3: boltadeildar™️ vefþjónustur
 
 [Kynning í fyrirlestri](https://youtu.be/laL6P4hCnfQ).

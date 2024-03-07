@@ -6,7 +6,16 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "sourceMap": true,
+    "baseUrl": "./",
+    "paths": {
+      "@lib/*": ["src/lib/*.js"],
+      "@routes/*": ["src/routes/*.js"],
+      "@setup/*": ["src/routes/*.js"]
+    }
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]

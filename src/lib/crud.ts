@@ -198,11 +198,11 @@ export const postGame = [
 	}),
 	body('home.score')
 		.trim()
-		.isInt({ min: 0, max: 100 })
-		.withMessage('home.score þarf að vera á bilinu 0 til 100'),
+		.isInt({ min: 0, max: 99 })
+		.withMessage('home.score þarf að vera á bilinu 0 til 99'),
 	body('away.score')
-		.isInt({ min: 0, max: 100 })
-		.withMessage('away.score þarf að vera á bilinu 0 til 100'),
+		.isInt({ min: 0, max: 99 })
+		.withMessage('away.score þarf að vera á bilinu 0 til 99'),
 	xssSanitizer('home.name'),
 	xssSanitizer('away.name'),
 	xssSanitizer('home.score'),
@@ -240,12 +240,10 @@ export async function updateGame(
 	]
 	if (!Number.parseInt(home?.name) || !Number.parseInt(away?.name)) {
 		const teams = await listTeams();
-		console.log(teams)
 		home_name = teams?.find(stak => stak.name === home?.name);
 		home_name = home_name ? Number.parseInt(home_name.id) : home?.name
 		away_name = teams?.find(stak => stak.name === away?.name);
 		away_name = away_name ? Number.parseInt(away_name.id) : away?.name
-		console.log(home_name, away_name)
 	}
 	const values = [
 		typeof date === 'string' && date || null,
@@ -273,8 +271,8 @@ export async function updateGame(
 }
 
 export const patchGame = [
-	stringValidator({ field: 'home.name', minLength: 3, maxLength: 128, optional: true }), // min 3 max 128
-	stringValidator({ field: 'away.name', minLength: 3, maxLength: 128, optional: true }), // min 3 max 128
+	stringValidator({ field: 'home.name', minLength: 3, maxLength: 128, optional: true }).optional(true), // min 3 max 128
+	stringValidator({ field: 'away.name', minLength: 3, maxLength: 128, optional: true }).optional(true), // min 3 max 128
 	atLeastOneBodyValueValidator(['home', 'away', 'date']),
 	body('date')
 		.trim()
@@ -283,20 +281,20 @@ export const patchGame = [
 			return !Number.isNaN(date.getTime());
 		})
 		.withMessage('Dagsetning verður að vera gild')
-		.optional(),
+		.optional(true),
 	body('home').custom(async (value, { req }) => {
 		if (value.name && value.name === req.body.away.name) {
 			throw new Error('Heimalið og útilið verða að vera mismunandi');
 		}
 		return true;
-	}).optional(),
+	}).optional(true),
 	body('home.score')
 		.trim()
-		.isInt({ min: 0, max: 100 })
-		.withMessage('home.score þarf að vera á bilinu 0 til 100').optional(),
+		.isInt({ min: 0, max: 99 })
+		.withMessage('home.score þarf að vera á bilinu 0 til 99').optional(true),
 	body('away.score')
-		.isInt({ min: 0, max: 100 })
-		.withMessage('away.score þarf að vera á bilinu 0 til 100').optional(),
+		.isInt({ min: 0, max: 99 })
+		.withMessage('away.score þarf að vera á bilinu 0 til 99').optional(true),
 	xssSanitizer('home.name'),
 	xssSanitizer('away.name'),
 	xssSanitizer('home.score'),

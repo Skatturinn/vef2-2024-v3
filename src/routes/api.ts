@@ -1,21 +1,12 @@
 import dotenv from 'dotenv';
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import { catchErrors } from '../lib/catch-errors.js';
 import { deleteGame, deleteTeam, patchGame, patchTeam, postGame, postTeam, resGame, resGames, resTeams, returnTeam } from '../lib/crud.js';
-import { sayHello } from '../lib/hello.js';
 
 dotenv.config();
 
 export const router = express.Router();
 
-export async function hello(req: Request, res: Response, next: NextFunction) {
-	res.json({ hello: sayHello('world') });
-	next();
-}
-
-export async function bye() {
-	console.log('done');
-}
 
 export async function error() {
 	throw new Error('error');

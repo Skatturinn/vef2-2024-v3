@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import { catchErrors } from './lib/catch-errors.js';
 import { router } from './routes/api.js';
 
-const app = express();
+export const app = express();
 export async function index(req: Request, res: Response) {
 	res.json([
 		{
@@ -52,8 +52,6 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 	) {
 		return res.status(400).json({ error: 'invalid json' });
 	}
-
-	console.error('error handling route', err);
 	return res
 		.status(500)
 		.json({ error: err.message ?? 'internal server error' });

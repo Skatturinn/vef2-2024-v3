@@ -43,7 +43,7 @@ describe('integration', () => {
 			expect(response.statusCode).toBe(201);
 		});
 		if (!Number.isNaN(gameid)) {
-			test('Delete /teams/whatda returns 204', async () => {
+			test('Delete /games/:id returns 204', async () => {
 				const response = await request(app).delete(`/games/${gameid}`);
 				expect(response.statusCode).toBe(204);
 			});
